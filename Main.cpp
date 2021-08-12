@@ -1,4 +1,6 @@
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -13,10 +15,12 @@ public:
     Tic_tac_toe();
     void move(int i, int j);
     bool winning_move(int i, int j) const;
+    bool is_full() const;
+    
     friend ostream& operator<<(ostream& os, const Tic_tac_toe& game);
     field cur_player() const { return current_player; }
     void switch_players() { current_player = (current_player == field::X ? field::O : field::X); }
-
+    
 
 private:
     bool game_over;
@@ -79,11 +83,18 @@ bool Tic_tac_toe::winning_move(int i, int j) const {
     return whole_row(i) || whole_col(j) || diagonal(i, j);
 }
 
+bool Tic_tac_toe::is_full() const {
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            if (board[i][j] == field::empty)
+                return false;
+    return true;
+}
 
 void play_tic_tac_toe() {
     Tic_tac_toe game;
     int i = 0, j = 0;
-    while (!game.winning_move(i, j)) {
+    while (!game.winning_move(i, j) && !game.is_full()) {
         game.switch_players();
         cout << game << '\n';
         cout << "Player: " << static_cast<char>(game.cur_player()) << ", Enter a row and a column to make a move\n";
@@ -101,13 +112,13 @@ void play_tic_tac_toe() {
             }
         }
     }
-    cout << game << "\n\nCongratulatoins: Player " << static_cast<char>(game.cur_player()) << " won the game!\n";
+    if (game.winning_move(i, j))
+        cout << game << "\n\nCongratulatoins: Player " << static_cast<char>(game.cur_player()) << " won the game!\n";
+    else
+        cout << game << "\n\nTied game.\n";
 }
 
-#include <fstream>
 
 int main() {
     play_tic_tac_toe();
-   // while (1);
-    ofstream ofs{ "output.txt" };
 }
