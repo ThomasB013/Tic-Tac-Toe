@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <vector>
 
 struct illegal_move {};
 struct out_of_range_move : illegal_move {};
@@ -7,7 +8,7 @@ struct non_empty_field_move : illegal_move {};
 
 enum class field : char { empty = ' ', X = 'x', O = 'o' };
 enum class state { in_game, tied, x_won, o_won };
-enum class gamemode {multiplayer, singleplayer};
+enum class gamemode { multiplayer, singleplayer };
 
 class Tic_tac_toe {
 public:
@@ -19,6 +20,7 @@ public:
     void switch_players() { current_player = (current_player == field::X ? field::O : field::X); }
     friend std::ostream& operator<<(std::ostream& os, const Tic_tac_toe& game);
     friend int score(const Tic_tac_toe& game);
+    friend std::vector<std::pair<int, int>> poss_moves(const Tic_tac_toe& game);
 private:
     state status;
     field current_player;
@@ -31,4 +33,3 @@ private:
 };
 
 void play_tic_tac_toe(gamemode mode);
-

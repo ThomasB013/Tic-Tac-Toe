@@ -72,6 +72,7 @@ bool Tic_tac_toe::is_full() const {
     return true;
 }
 
+
 void human_move(Tic_tac_toe& game, std::ostream& os = std::cout, std::istream& is = std::cin) {
     int i = 0, j = 0;
     while (1) {
@@ -89,13 +90,64 @@ void human_move(Tic_tac_toe& game, std::ostream& os = std::cout, std::istream& i
     }
 }
 
+//Helper functions for minimax:
+bool maximizing(const Tic_tac_toe& game) {
+    return game.cur_player() == field::X;
+}
+
+int score(const Tic_tac_toe& game) {
+    switch (game.get_status()) {
+    case state::o_won: return std::numeric_limits<int>::min(); //minimizing
+    case state::x_won: return std::numeric_limits<int>::max(); //maximizing
+    case state::tied: return 0;
+    }
+    int ans = 0;
+    for (int i = 0; i < 3; i += 2)//give 50 points for corner points.
+        for (int j = 0; j < 3; j += 2)
+            if (game.board[i][j] != field::empty)
+                ans += (game.board[i][j] == field::X ? 50 : -50);
+    for (int i = 0; i < 3; ++i)
+        for (int j = (i % 2 == 0 ? 1 : 0); j < 3; j += 2)
+            if (game.board[i][j] != field::empty)
+                ans += (game.board[i][j] == field::X ? 30 : -30); //30 points for corners
+    if (game.board[1][1] != field::empty)
+        ans += (game.board[1][1] == field::X ? 100 : -100); //100 points for middle.
+    return ans;
+}
+
+std::vector<std::pair<int, int>> poss_moves(const Tic_tac_toe& game) {
+    std::vector<std::pair<int, int>> v;
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            if (game.board[i][j] == field::empty)
+                v.push_back({ i, j });
+    return v;
+}
+
+void transition(Tic_tac_toe& game, std::pair<int, int> m) {
+    game.move(m.first, m.second);
+    game.switch_players();
+}
+
+bool stop_condition(const Tic_tac_toe& game) {
+    return game.get_status() != state::in_game;
+}
+
 void computer_move(Tic_tac_toe& game) {
-    std::pair<int, int> x = best_move(game);
+    using State = Tic_tac_toe;
+    using Move = std::pair<int, int>;
+    minimax<State, Move> pc(game, 3);
+    pc.set_maximizing_method(maximizing);
+    pc.set_possible_moves_method(poss_moves);
+    pc.set_score_method(score);
+    pc.set_transition_method(transition);
+    pc.set_stop_condition_method(stop_condition);
+    Move x = pc.next_move();
     game.move(x.first, x.second);
 }
 
 void play_game(Tic_tac_toe& game, gamemode mode, std::ostream& os = std::cout, std::istream& is = std::cin) {
-    bool human_turn = true;
+    bool human_turn = mode == gamemode::multiplayer;
     while (game.get_status() == state::in_game) {
         os << game << "\nPlayer: " << static_cast<char>(game.cur_player()) << ", Enter a row and a column to make a move\n";
         if (human_turn)
