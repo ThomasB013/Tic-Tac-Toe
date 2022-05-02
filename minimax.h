@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <limits>
 
 struct missing_method {};
 struct missing_score_method : missing_method {};
@@ -55,10 +56,8 @@ minimax<State, Move>::minimax(const State& state, unsigned int depth) : starting
 
 template<typename State, typename Move>
 minimax<State, Move>::node::~node() {
-	for (node* n : children) {
-		n->~node();
+	for (node* n : children)
 		delete n;
-	}
 }
 
 template<typename State, typename Move>

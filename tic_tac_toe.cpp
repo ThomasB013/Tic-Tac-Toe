@@ -1,6 +1,7 @@
 #include "tic_tac_toe.h"
 #include "minimax.h"
 #include <string>
+#include <limits>
 
 Tic_tac_toe::Tic_tac_toe() : status(state::in_game), current_player(field::X) {
     for (int i = 0; i < 3; ++i)
